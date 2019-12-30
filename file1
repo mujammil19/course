@@ -17,12 +17,12 @@ pipeline{
 				steps{ input ('Do you want to proceed?')
 						echo 'this is deploy stage'
 					}
-				}
 				
 			post {
 				success {
 					mail to: 'manikyammujammil@gmail.com', subject: 'job is success', body: 'this is test'
 						}
 				}
+			}
 	}
 }
