@@ -1,24 +1,31 @@
-pipeline{
-	agent any
-		stages {
-			stage('Preperation'){
-				steps{ sh 'docker pull ubuntu'
-				       sh 'docker pull nginx'
-				       sh 'docker pull tutum/hello-world'
-					}
-				}
-			stage('build'){
-				steps{ sh 'docker run -itd -p 82:80 --name kohli tutum/hello-world'
-					}
-				}
-			stage('test'){
-				steps{ echo 'this is testing stage'
-					}
-				}
-			stage('deploy'){
-				steps{ input ('Do you want to proceed?')
-					echo 'this is deploy stage'
-					}
-				}
-	}
+pipeline {
+  agent any
+  stages{
+    stage('Build'){
+      steps {
+              sh 'mvn clean package'
+      }
+        post {
+          success { 
+              echo 'Now Archiving...'
+              archiveArtifacts artifacts: '**/target/*.war'
+          }
+        }
+     }
+    
+    stage ('Deployments'){
+      parallel{
+        stage ('Deploy to Staging'){
+          steps {
+                sh "cp **/target/*.war /usr/local/apache-tomcat9/webapps"
+          }
+        }
+      }
+      post {
+        success {
+          mail to: 'manikyammujammil@gmail.com', subject: 'job is success', body: 'this is test'
+        }
+      }
+    }
+  }
 }
